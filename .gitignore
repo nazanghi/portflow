@@ -17,3 +17,7 @@ build/
 # IDE
 .vscode/
 .idea/
+
+
+# prep:
+INTERVIEW_PREP.md
