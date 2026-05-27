@@ -1,0 +1,28 @@
+========================================================
+  PORTFLOW — ALLOCATION REPORT
+  Run date : 2026-05-27
+  Run ID   : 8
+  Status   : optimal
+========================================================
+
+  TARGET WEIGHTS
+  ----------------------------------------
+  AGG     40.00%  ███████████████
+  SPY     22.95%  █████████
+  GSG     18.32%  ███████
+  IEF     18.00%  ███████
+  GLD      0.73%  
+  EFA      0.00%  
+  VNQ      0.00%  
+
+  PORTFOLIO STATISTICS
+  ----------------------------------------
+  Expected return  :   16.34%  (momentum-based)
+  Expected vol     :    4.65%  (annualised)
+  Sharpe ratio     :     3.52  (rf = 0)
+
+  NOTE: Sharpe is overstated — momentum signal is a
+  12-month cumulative return, not an annualised forecast.
+  Treat as a relative ranking, not an absolute figure.
+
+========================================================

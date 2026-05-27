@@ -134,9 +134,11 @@ def optimize(
     return result
 
 
-def store_weights(result: dict, run_date: date = None) -> int:
+def store_weights(result: dict, expected_returns: pd.Series, run_date: date = None) -> int:
     """
     Write optimized weights to the portfolio_weights table.
+    expected_returns should be the per-ticker momentum signal,
+    not the portfolio-level aggregate.
     Returns the run_id assigned by the database.
     """
     if run_date is None:
@@ -160,7 +162,7 @@ def store_weights(result: dict, run_date: date = None) -> int:
                     "run_date":        run_date,
                     "ticker":          ticker,
                     "weight":          float(weight),
-                    "expected_return": result["expected_return"],
+                    "expected_return": float(expected_returns.get(ticker, 0.0)),
                 })
                 if run_id is None:
                     run_id = cur.fetchone()["run_id"]
@@ -168,7 +170,6 @@ def store_weights(result: dict, run_date: date = None) -> int:
 
     logger.info("Stored weights for run_id=%d, date=%s", run_id, run_date)
     return run_id
-
 
 # ---------------------------------------------------------------------------
 # Solvers

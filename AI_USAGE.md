@@ -120,3 +120,51 @@ cursor choices were made silently.
 - Detection method: runtime error on first execution.
 - Failure category: Convention blindness — assumed float dtype without
   accounting for psycopg2 Decimal return types.
+
+  ### Session 4 — Optimization
+
+**Module**: `optimization/optimizer.py`  
+**What was generated**: Charnes-Cooper max Sharpe reformulation, min variance
+fallback, weight storage  
+
+**Implicit decisions**:
+- `SOLVER = cp.ECOS` — ECOS removed from CVXPY defaults in recent versions.
+  Caught immediately on first run. Fixed to CLARABEL.
+  Failure category: Convention blindness.
+- `MAX_POSITION_SIZE = 0.40` — chosen without discussion. AGG immediately
+  hit this cap, meaning the constraint is actively binding. A tighter cap
+  (0.30) would force more diversification.
+- Sharpe ratio of 3.5 is an artifact of using 12-month cumulative momentum
+  as the return input against annualized volatility. Units are inconsistent.
+  Should normalize momentum to annualized return before computing Sharpe.
+  Failure category: Ambiguity without disclosure.
+
+**Bug caught in review**:
+- `expected_return` column stores portfolio-level return, not per-ticker
+  momentum. Column name implies per-ticker semantics. Semantically wrong.
+  Fix: store per-ticker momentum value, or rename column.
+  Failure category: Confident wrongness.
+
+  ### Session 5 — Output and orchestration
+
+**Module**: `pipeline.py`  
+**What was generated**: Prefect flow, four tasks, audit logging per stage  
+
+**Implicit decisions**:
+- Prefect spins up a temporary local server on each run — fine for
+  development, not for production. A dedicated Prefect server or
+  Prefect Cloud would replace this.
+- Flow name 'portflow' is hardcoded — not discussed before generation.
+
+**Bugs caught in review**:
+- `tickers: list[str] = None` rejected by Prefect 3's Pydantic validation.
+  Fixed to `tickers: list[str] = TICKERS`.
+  Detection method: first run error.
+  Failure category: Convention blindness.
+
+- `db.log_run(status="success")` called before `store_weights()` in
+  task_optimize. If store_weights fails, audit log shows success with
+  no corresponding failure entry for that write. Fix: move success log
+  to after store_weights returns.
+  Detection method: three-question review.
+  Failure category: Error recovery failure.
