@@ -96,3 +96,27 @@ cursor choices were made silently.
 - Detection method: three-question review, indentation inspection.
 - Correct approach: use `all_equal` in the apply or remove the definition.
 - Failure category: Scope creep.
+
+### Session 3 — Signal computation
+
+**Module**: `signals/compute.py`  
+**What was generated**: price loading, log returns, rolling vol, momentum, covariance matrix  
+
+**Implicit decisions**:
+- `VOL_LOOKBACK_DAYS = 60` — two months chosen without discussion. Shorter
+  windows are more responsive but noisier. Not specified before generation.
+- `lookback_days = 400` in load_prices — slightly more than MOM_LONG_DAYS (252)
+  to ensure enough history. Implicit buffer, not discussed.
+- Signals not persisted to database — deliberate tradeoff: avoids storing
+  derived data that could get out of sync with prices. Auditability gap
+  noted; signals table deferred to post-MVP hardening.
+- Covariance uses full history — regime dependence problem noted.
+  Exponentially weighted covariance (ewm().cov()) identified as
+  production fix. Deferred.
+
+**Bug caught in review**:
+- `np.log()` failed on Decimal types returned by RealDictCursor from
+  postgres. Fixed by adding `pivot.astype(float)` in load_prices.
+- Detection method: runtime error on first execution.
+- Failure category: Convention blindness — assumed float dtype without
+  accounting for psycopg2 Decimal return types.
